@@ -47,7 +47,7 @@ fashion_mnist_labels = {
 }
 
 # %%
-image = df_train.iloc[0, 1:].to_numpy().reshape(28, 28) # Reshape only 1 image into 28x28 pixels
+image = df_train.iloc[0, 1:].to_numpy().reshape(28, 28) # Reshape only 1 image into 28x28 pixels to display
 image_label = fashion_mnist_labels[df_train.iloc[0, 0]]
 
 plt.imshow(image, cmap='gray')

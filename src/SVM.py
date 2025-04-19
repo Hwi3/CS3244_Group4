@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from sklearn.svm import SVC
-# from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     classification_report,
     accuracy_score,
@@ -22,7 +21,7 @@ print("import done")
 import torch
 from torch.utils.data import TensorDataset
 
-# Load dataset
+# load dataset
 df_train = pd.read_csv("../data/fashion-mnist_train.csv")
 df_test = pd.read_csv("../data/fashion-mnist_test.csv")
 
@@ -38,6 +37,8 @@ fashion_mnist_labels = {
     8: "Bag",
     9: "Ankle boot"
 }
+
+########################################## use SIFT
 
 # def extract_sift_features(images):
 #     sift = cv2.SIFT_create()
@@ -92,20 +93,20 @@ fashion_mnist_labels = {
 # print("Test Error:", 1 - accuracy_score(y_test, y_test_pred))
 # print("Classification Report:\n", classification_report(y_test, y_test_pred))
 
-########################################## use full 784 pixels
+########################################## use PCA data (previous edited to use full 784 pixels too, as base model)
 
-# Load saved PCA tensors
+# load PCA data via torch
 X_train_tensor, y_train_tensor = torch.load("train_tensors.pt")
 X_test_tensor, y_test_tensor = torch.load("test_tensors.pt")
 
-# Convert to NumPy for scikit-learn
+# to read into sci-kit learn
 X_train = X_train_tensor.numpy()
 y_train = y_train_tensor.numpy()
 
 X_test = X_test_tensor.numpy()
 y_test = y_test_tensor.numpy()
 
-# Train SVM (with probability enabled)
+# training with probability enabled 
 svm_model = SVC(kernel='rbf', probability = True)
 svm_model.fit(X_train, y_train)
 y_train_pred = svm_model.predict(X_train)
@@ -113,48 +114,48 @@ train_accuracy = accuracy_score(y_train, y_train_pred)
 print(f"\nTraining Accuracy: {train_accuracy:.4f}")
 print("Finished training")
 
-# --- Inference Time ---
+#  Inference Time 
 start_time = time.time()
 y_pred = svm_model.predict(X_test)
 end_time = time.time()
 inference_time = end_time - start_time
 print(f"\nInference Time: {inference_time:.4f} seconds")
 
-# # --- Memory Usage ---
+# Memory Usage 
 # def predict_with_memory():
 #     return svm_model.predict(X_test)
 
 # mem_usage = memory_usage(predict_with_memory)
 # print(f"Memory Usage during inference: {max(mem_usage) - min(mem_usage):.2f} MiB")
 
-# --- Accuracy & Report ---
+# Accuracy & Report 
 test_accuracy = accuracy_score(y_test, y_pred)
 print(f"\nTest Accuracy: {test_accuracy:.4f}")
 print(f"Test Error: {1 - test_accuracy:.4f}")
 print("\nClassification Report:\n", classification_report(y_test, y_pred))
 
-# --- Class Accuracy ---
+# Class Accuracy 
 print("\nClass-wise Accuracy:")
 for label in np.unique(y_test):
     idx = (y_test == label)
     acc = accuracy_score(y_test[idx], y_pred[idx])
     print(f"Class {label} ({fashion_mnist_labels[label]}): {acc:.2f}")
 
-# --- Top-k Accuracy ---
+# Top-k Accuracy 
 y_pred_proba = svm_model.predict_proba(X_test)
 top3_acc = top_k_accuracy_score(y_test, y_pred_proba, k=3)
 print(f"\nTop-3 Accuracy: {top3_acc:.2f}")
 
-# --- AUC-ROC ---
+# AUC-ROC 
 y_test_bin = label_binarize(y_test, classes=np.arange(10))
 roc_auc = roc_auc_score(y_test_bin, y_pred_proba, multi_class='ovr')
 print(f"AUC-ROC Score (OvR): {roc_auc:.2f}")
 
-# --- Log Loss ---
+# Log Loss 
 logloss = log_loss(y_test, y_pred_proba)
 print(f"Log Loss: {logloss:.4f}")
 
-# --- Confusion Matrix ---
+# Confusion Matrix
 cm = confusion_matrix(y_test, y_pred)
 plt.figure(figsize=(10, 8))
 sns.heatmap(cm, annot=True, fmt='d',
